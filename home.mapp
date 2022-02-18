@@ -1,0 +1,187 @@
+classdef Home < matlab.apps.AppBase
+
+    % Properties that correspond to app components
+    properties (Access = public)
+        UIFigure                 matlab.ui.Figure
+        Label_2                  matlab.ui.control.Label
+        Label                    matlab.ui.control.Label
+        AhmadSaqlainMonsurLabel  matlab.ui.control.Label
+        RaihanAminRanaLabel      matlab.ui.control.Label
+        PreparedbyLabel          matlab.ui.control.Label
+        InductionMotorLabel      matlab.ui.control.Label
+        Panel_3                  matlab.ui.container.Panel
+        TransformerLabel         matlab.ui.control.Label
+        AnalysisofTransformerandInductionMotorLabel  matlab.ui.control.Label
+        Panel                    matlab.ui.container.Panel
+        PhaseTransformerButton   matlab.ui.control.Button
+        OpenCircuitShortCircuitTestButton  matlab.ui.control.Button
+        MATLABProjectLabel       matlab.ui.control.Label
+        EEE212Label              matlab.ui.control.Label
+    end
+
+    % Callbacks that handle component events
+    methods (Access = private)
+
+        % Button pushed function: OpenCircuitShortCircuitTestButton
+        function OpenCircuitShortCircuitTestButtonPushed(app, event)
+            Home.app.callingapp = Xer_Open_Short;
+        end
+    end
+
+    % Component initialization
+    methods (Access = private)
+
+        % Create UIFigure and components
+        function createComponents(app)
+
+            % Create UIFigure and hide until all components are created
+            app.UIFigure = uifigure('Visible', 'off');
+            app.UIFigure.Position = [100 100 993 539];
+            app.UIFigure.Name = 'MATLAB App';
+            app.UIFigure.Pointer = 'hand';
+
+            % Create EEE212Label
+            app.EEE212Label = uilabel(app.UIFigure);
+            app.EEE212Label.FontName = 'Cambria';
+            app.EEE212Label.FontSize = 26;
+            app.EEE212Label.FontWeight = 'bold';
+            app.EEE212Label.FontColor = [1 0 0];
+            app.EEE212Label.Position = [447 506 102 34];
+            app.EEE212Label.Text = 'EEE 212';
+
+            % Create MATLABProjectLabel
+            app.MATLABProjectLabel = uilabel(app.UIFigure);
+            app.MATLABProjectLabel.FontName = 'Cambria';
+            app.MATLABProjectLabel.FontSize = 28;
+            app.MATLABProjectLabel.FontWeight = 'bold';
+            app.MATLABProjectLabel.FontColor = [1 0 0];
+            app.MATLABProjectLabel.Position = [391 470 214 37];
+            app.MATLABProjectLabel.Text = 'MATLAB Project';
+
+            % Create Panel
+            app.Panel = uipanel(app.UIFigure);
+            app.Panel.BackgroundColor = [0.902 0.902 0.902];
+            app.Panel.FontName = 'Cambria';
+            app.Panel.FontWeight = 'bold';
+            app.Panel.Position = [54 96 426 272];
+
+            % Create OpenCircuitShortCircuitTestButton
+            app.OpenCircuitShortCircuitTestButton = uibutton(app.Panel, 'push');
+            app.OpenCircuitShortCircuitTestButton.ButtonPushedFcn = createCallbackFcn(app, @OpenCircuitShortCircuitTestButtonPushed, true);
+            app.OpenCircuitShortCircuitTestButton.FontName = 'Cambria';
+            app.OpenCircuitShortCircuitTestButton.FontSize = 20;
+            app.OpenCircuitShortCircuitTestButton.FontWeight = 'bold';
+            app.OpenCircuitShortCircuitTestButton.Position = [46 212 308 38];
+            app.OpenCircuitShortCircuitTestButton.Text = 'Open Circuit - Short Circuit Test';
+
+            % Create PhaseTransformerButton
+            app.PhaseTransformerButton = uibutton(app.Panel, 'push');
+            app.PhaseTransformerButton.FontName = 'Cambria';
+            app.PhaseTransformerButton.FontSize = 24;
+            app.PhaseTransformerButton.FontWeight = 'bold';
+            app.PhaseTransformerButton.Position = [77 147 254 38];
+            app.PhaseTransformerButton.Text = '3 Phase Transformer ';
+
+            % Create AnalysisofTransformerandInductionMotorLabel
+            app.AnalysisofTransformerandInductionMotorLabel = uilabel(app.UIFigure);
+            app.AnalysisofTransformerandInductionMotorLabel.FontName = 'Cambria';
+            app.AnalysisofTransformerandInductionMotorLabel.FontSize = 24;
+            app.AnalysisofTransformerandInductionMotorLabel.FontWeight = 'bold';
+            app.AnalysisofTransformerandInductionMotorLabel.FontColor = [0 0 1];
+            app.AnalysisofTransformerandInductionMotorLabel.Position = [242 440 512 31];
+            app.AnalysisofTransformerandInductionMotorLabel.Text = 'Analysis of Transformer and Induction Motor';
+
+            % Create TransformerLabel
+            app.TransformerLabel = uilabel(app.UIFigure);
+            app.TransformerLabel.BackgroundColor = [0 0 1];
+            app.TransformerLabel.HorizontalAlignment = 'center';
+            app.TransformerLabel.FontName = 'Cambria';
+            app.TransformerLabel.FontSize = 24;
+            app.TransformerLabel.FontWeight = 'bold';
+            app.TransformerLabel.FontColor = [1 1 1];
+            app.TransformerLabel.Position = [54 367 426 31];
+            app.TransformerLabel.Text = 'Transformer';
+
+            % Create Panel_3
+            app.Panel_3 = uipanel(app.UIFigure);
+            app.Panel_3.BackgroundColor = [0.902 0.902 0.902];
+            app.Panel_3.FontName = 'Cambria';
+            app.Panel_3.FontWeight = 'bold';
+            app.Panel_3.Position = [520 96 426 272];
+
+            % Create InductionMotorLabel
+            app.InductionMotorLabel = uilabel(app.UIFigure);
+            app.InductionMotorLabel.BackgroundColor = [0 0 1];
+            app.InductionMotorLabel.HorizontalAlignment = 'center';
+            app.InductionMotorLabel.FontName = 'Cambria';
+            app.InductionMotorLabel.FontSize = 24;
+            app.InductionMotorLabel.FontWeight = 'bold';
+            app.InductionMotorLabel.FontColor = [1 1 1];
+            app.InductionMotorLabel.Position = [520 367 426 31];
+            app.InductionMotorLabel.Text = 'Induction Motor';
+
+            % Create PreparedbyLabel
+            app.PreparedbyLabel = uilabel(app.UIFigure);
+            app.PreparedbyLabel.FontName = 'Cambria';
+            app.PreparedbyLabel.FontWeight = 'bold';
+            app.PreparedbyLabel.Position = [461 56 75 22];
+            app.PreparedbyLabel.Text = 'Prepared by:';
+
+            % Create RaihanAminRanaLabel
+            app.RaihanAminRanaLabel = uilabel(app.UIFigure);
+            app.RaihanAminRanaLabel.FontName = 'Cambria';
+            app.RaihanAminRanaLabel.FontWeight = 'bold';
+            app.RaihanAminRanaLabel.Position = [377 35 109 22];
+            app.RaihanAminRanaLabel.Text = 'Raihan Amin Rana ';
+
+            % Create AhmadSaqlainMonsurLabel
+            app.AhmadSaqlainMonsurLabel = uilabel(app.UIFigure);
+            app.AhmadSaqlainMonsurLabel.FontName = 'Cambria';
+            app.AhmadSaqlainMonsurLabel.FontWeight = 'bold';
+            app.AhmadSaqlainMonsurLabel.Position = [520 35 134 22];
+            app.AhmadSaqlainMonsurLabel.Text = 'Ahmad Saqlain Monsur';
+
+            % Create Label
+            app.Label = uilabel(app.UIFigure);
+            app.Label.FontName = 'Cambria';
+            app.Label.FontWeight = 'bold';
+            app.Label.Position = [402 14 54 22];
+            app.Label.Text = '1906186';
+
+            % Create Label_2
+            app.Label_2 = uilabel(app.UIFigure);
+            app.Label_2.FontName = 'Cambria';
+            app.Label_2.FontWeight = 'bold';
+            app.Label_2.Position = [556 14 54 22];
+            app.Label_2.Text = '1906187';
+
+            % Show the figure after all components are created
+            app.UIFigure.Visible = 'on';
+        end
+    end
+
+    % App creation and deletion
+    methods (Access = public)
+
+        % Construct app
+        function app = Home
+
+            % Create UIFigure and components
+            createComponents(app)
+
+            % Register the app with App Designer
+            registerApp(app, app.UIFigure)
+
+            if nargout == 0
+                clear app
+            end
+        end
+
+        % Code that executes before app deletion
+        function delete(app)
+
+            % Delete UIFigure when app is deleted
+            delete(app.UIFigure)
+        end
+    end
+end
