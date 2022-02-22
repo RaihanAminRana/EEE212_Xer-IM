@@ -83,6 +83,9 @@ classdef IM_Torque_Speed < matlab.apps.AppBase
             Tau = zeros(1, length(n_m));
             for i = 1: length(n_m)
                 Tau(i) = (3*(app.V_TH)^2*R_2)/(w_sync*s(i)*((app.R_TH +(R_2/s(i)))^2 + (app.X_TH +X_2)^2));
+                if n_m(i) == app.n_sync
+                    Tau(i) = 0;
+                end
             end
             
             plot(UIAxes, n_m, Tau);
@@ -106,7 +109,7 @@ classdef IM_Torque_Speed < matlab.apps.AppBase
            app.Pole = app.PoleSpinner.Value;
            app.n_sync = 120*app.Frequency/app.Pole;
            
-           V_p = app.V_pEditField.Value;
+           V_p = app.V_pEditField.Value/sqrt(3);
            R_1 = app.R_1EditField.Value;
            X_1 = app.X_1EditField.Value;
            R_C = app.R_CEditField.Value;
@@ -126,7 +129,6 @@ classdef IM_Torque_Speed < matlab.apps.AppBase
            plot_BN(app,app.UIAxes_BN, V_p, R_1, X_1, R_2, X_2, X_M);
            plot_T(app, app.UIAxes_T,R_2,X_2);
            
-%            IM_TS_Region(app);
         end
 
         % Button pushed function: InspectTSCurveButton
