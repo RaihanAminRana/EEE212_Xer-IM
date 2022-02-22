@@ -10,10 +10,14 @@ classdef Home < matlab.apps.AppBase
         PreparedbyLabel          matlab.ui.control.Label
         InductionMotorLabel      matlab.ui.control.Label
         Panel_3                  matlab.ui.container.Panel
+        DifferentRegionsinTSCurveButton  matlab.ui.control.Button
+        VariousSpeedControlTechniquesButton  matlab.ui.control.Button
+        TorqueSpeedCharecteristicsButton  matlab.ui.control.Button
         TransformerLabel         matlab.ui.control.Label
         AnalysisofTransformerandInductionMotorLabel  matlab.ui.control.Label
         Panel                    matlab.ui.container.Panel
         PhaseTransformerButton   matlab.ui.control.Button
+        AutoTransformerButton    matlab.ui.control.Button
         OpenCircuitShortCircuitTestButton  matlab.ui.control.Button
         MATLABProjectLabel       matlab.ui.control.Label
         EEE212Label              matlab.ui.control.Label
@@ -22,9 +26,40 @@ classdef Home < matlab.apps.AppBase
     % Callbacks that handle component events
     methods (Access = private)
 
+        % Code that executes after component creation
+        function startupFcn(app)
+            app.UIFigure.Name = 'EEE 212 Project: Home Page';
+        end
+
         % Button pushed function: OpenCircuitShortCircuitTestButton
         function OpenCircuitShortCircuitTestButtonPushed(app, event)
-            Home.app.callingapp = Xer_Open_Short;
+          Xer_Open_Short;
+        end
+
+        % Button pushed function: TorqueSpeedCharecteristicsButton
+        function TorqueSpeedCharecteristicsButtonPushed(app, event)
+            IM_Torque_Speed;
+        end
+
+        % Button pushed function: DifferentRegionsinTSCurveButton
+        function DifferentRegionsinTSCurveButtonPushed(app, event)
+            IM_TS_Region;
+        end
+
+        % Button pushed function: AutoTransformerButton
+        function AutoTransformerButtonPushed(app, event)
+            Xer_Auto;
+        end
+
+        % Button pushed function: 
+        % VariousSpeedControlTechniquesButton
+        function VariousSpeedControlTechniquesButtonPushed(app, event)
+            IM_Speed_Control;
+        end
+
+        % Button pushed function: PhaseTransformerButton
+        function PhaseTransformerButtonPushed(app, event)
+            Xer_3Phase;
         end
     end
 
@@ -63,7 +98,7 @@ classdef Home < matlab.apps.AppBase
             app.Panel.BackgroundColor = [0.902 0.902 0.902];
             app.Panel.FontName = 'Cambria';
             app.Panel.FontWeight = 'bold';
-            app.Panel.Position = [54 96 426 272];
+            app.Panel.Position = [64 96 426 272];
 
             % Create OpenCircuitShortCircuitTestButton
             app.OpenCircuitShortCircuitTestButton = uibutton(app.Panel, 'push');
@@ -71,16 +106,26 @@ classdef Home < matlab.apps.AppBase
             app.OpenCircuitShortCircuitTestButton.FontName = 'Cambria';
             app.OpenCircuitShortCircuitTestButton.FontSize = 20;
             app.OpenCircuitShortCircuitTestButton.FontWeight = 'bold';
-            app.OpenCircuitShortCircuitTestButton.Position = [46 212 308 38];
+            app.OpenCircuitShortCircuitTestButton.Position = [53 182 320 48];
             app.OpenCircuitShortCircuitTestButton.Text = 'Open Circuit - Short Circuit Test';
+
+            % Create AutoTransformerButton
+            app.AutoTransformerButton = uibutton(app.Panel, 'push');
+            app.AutoTransformerButton.ButtonPushedFcn = createCallbackFcn(app, @AutoTransformerButtonPushed, true);
+            app.AutoTransformerButton.FontName = 'Cambria';
+            app.AutoTransformerButton.FontSize = 20;
+            app.AutoTransformerButton.FontWeight = 'bold';
+            app.AutoTransformerButton.Position = [53 24 320 48];
+            app.AutoTransformerButton.Text = 'Auto Transformer';
 
             % Create PhaseTransformerButton
             app.PhaseTransformerButton = uibutton(app.Panel, 'push');
+            app.PhaseTransformerButton.ButtonPushedFcn = createCallbackFcn(app, @PhaseTransformerButtonPushed, true);
             app.PhaseTransformerButton.FontName = 'Cambria';
-            app.PhaseTransformerButton.FontSize = 24;
+            app.PhaseTransformerButton.FontSize = 20;
             app.PhaseTransformerButton.FontWeight = 'bold';
-            app.PhaseTransformerButton.Position = [77 147 254 38];
-            app.PhaseTransformerButton.Text = '3 Phase Transformer ';
+            app.PhaseTransformerButton.Position = [53 104 320 48];
+            app.PhaseTransformerButton.Text = '3 Phase Transformer';
 
             % Create AnalysisofTransformerandInductionMotorLabel
             app.AnalysisofTransformerandInductionMotorLabel = uilabel(app.UIFigure);
@@ -99,7 +144,7 @@ classdef Home < matlab.apps.AppBase
             app.TransformerLabel.FontSize = 24;
             app.TransformerLabel.FontWeight = 'bold';
             app.TransformerLabel.FontColor = [1 1 1];
-            app.TransformerLabel.Position = [54 367 426 31];
+            app.TransformerLabel.Position = [64 367 426 31];
             app.TransformerLabel.Text = 'Transformer';
 
             % Create Panel_3
@@ -108,6 +153,33 @@ classdef Home < matlab.apps.AppBase
             app.Panel_3.FontName = 'Cambria';
             app.Panel_3.FontWeight = 'bold';
             app.Panel_3.Position = [520 96 426 272];
+
+            % Create TorqueSpeedCharecteristicsButton
+            app.TorqueSpeedCharecteristicsButton = uibutton(app.Panel_3, 'push');
+            app.TorqueSpeedCharecteristicsButton.ButtonPushedFcn = createCallbackFcn(app, @TorqueSpeedCharecteristicsButtonPushed, true);
+            app.TorqueSpeedCharecteristicsButton.FontName = 'Cambria';
+            app.TorqueSpeedCharecteristicsButton.FontSize = 20;
+            app.TorqueSpeedCharecteristicsButton.FontWeight = 'bold';
+            app.TorqueSpeedCharecteristicsButton.Position = [43 182 340 48];
+            app.TorqueSpeedCharecteristicsButton.Text = 'Torque - Speed Charecteristics';
+
+            % Create VariousSpeedControlTechniquesButton
+            app.VariousSpeedControlTechniquesButton = uibutton(app.Panel_3, 'push');
+            app.VariousSpeedControlTechniquesButton.ButtonPushedFcn = createCallbackFcn(app, @VariousSpeedControlTechniquesButtonPushed, true);
+            app.VariousSpeedControlTechniquesButton.FontName = 'Cambria';
+            app.VariousSpeedControlTechniquesButton.FontSize = 20;
+            app.VariousSpeedControlTechniquesButton.FontWeight = 'bold';
+            app.VariousSpeedControlTechniquesButton.Position = [43 24 340 48];
+            app.VariousSpeedControlTechniquesButton.Text = 'Various Speed - Control Techniques ';
+
+            % Create DifferentRegionsinTSCurveButton
+            app.DifferentRegionsinTSCurveButton = uibutton(app.Panel_3, 'push');
+            app.DifferentRegionsinTSCurveButton.ButtonPushedFcn = createCallbackFcn(app, @DifferentRegionsinTSCurveButtonPushed, true);
+            app.DifferentRegionsinTSCurveButton.FontName = 'Cambria';
+            app.DifferentRegionsinTSCurveButton.FontSize = 20;
+            app.DifferentRegionsinTSCurveButton.FontWeight = 'bold';
+            app.DifferentRegionsinTSCurveButton.Position = [43 104 340 48];
+            app.DifferentRegionsinTSCurveButton.Text = 'Different Regions in TS Curve';
 
             % Create InductionMotorLabel
             app.InductionMotorLabel = uilabel(app.UIFigure);
@@ -131,7 +203,7 @@ classdef Home < matlab.apps.AppBase
             app.RaihanAminRanaLabel = uilabel(app.UIFigure);
             app.RaihanAminRanaLabel.FontName = 'Cambria';
             app.RaihanAminRanaLabel.FontWeight = 'bold';
-            app.RaihanAminRanaLabel.Position = [377 35 109 22];
+            app.RaihanAminRanaLabel.Position = [377 32 113 25];
             app.RaihanAminRanaLabel.Text = 'Raihan Amin Rana ';
 
             % Create AhmadSaqlainMonsurLabel
@@ -171,6 +243,9 @@ classdef Home < matlab.apps.AppBase
 
             % Register the app with App Designer
             registerApp(app, app.UIFigure)
+
+            % Execute the startup function
+            runStartupFcn(app, @startupFcn)
 
             if nargout == 0
                 clear app
