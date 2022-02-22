@@ -1,0 +1,575 @@
+classdef IM_Speed_Control < matlab.apps.AppBase
+
+    % Properties that correspond to app components
+    properties (Access = public)
+        UIFigure                     matlab.ui.Figure
+        ResetButton                  matlab.ui.control.Button
+        PlotButton                   matlab.ui.control.Button
+        Max5numbersseparatedbyLabel  matlab.ui.control.Label
+        frequencyvalue               matlab.ui.control.NumericEditField
+        FrequencyKnob                matlab.ui.control.Knob
+        FrequencyKnobLabel           matlab.ui.control.Label
+        PoleSpinner                  matlab.ui.control.Spinner
+        PoleSpinnerLabel             matlab.ui.control.Label
+        R_2timesR_0Slider            matlab.ui.control.Slider
+        R_2timesR_0Label             matlab.ui.control.Label
+        InductionMotorSpeedControlTechniquesLabel  matlab.ui.control.Label
+        V_THEditField                matlab.ui.control.NumericEditField
+        V_THEditFieldLabel           matlab.ui.control.Label
+        X_THEditField                matlab.ui.control.NumericEditField
+        X_THEditFieldLabel           matlab.ui.control.Label
+        R_THEditField                matlab.ui.control.NumericEditField
+        R_THEditFieldLabel           matlab.ui.control.Label
+        X_2EditField                 matlab.ui.control.NumericEditField
+        X_2EditFieldLabel            matlab.ui.control.Label
+        R_2EditField                 matlab.ui.control.NumericEditField
+        R_2EditFieldLabel            matlab.ui.control.Label
+        param_list                   matlab.ui.control.EditField
+        ControllingParameterLabel    matlab.ui.control.Label
+        DropDown                     matlab.ui.control.DropDown
+        UIAxes                       matlab.ui.control.UIAxes
+    end
+
+
+    properties (Access = public)
+        % Description
+        tempapp;
+        V_TH;
+        R_TH;
+        X_TH;
+        Frequency;
+        Pole = 4;
+        state = 0;
+    end
+
+    methods (Access = public)
+
+        function plot_single_graph(app)
+            cla(app.UIAxes);
+            V_TH = app.V_THEditField.Value;
+            R_TH = app.R_THEditField.Value;
+            X_TH = app.X_THEditField.Value;
+            R_2 = app.R_2EditField.Value;
+            X_2 = app.X_2EditField.Value;
+            app.Frequency = app.FrequencyKnob.Value;
+            Frequency = app.Frequency;
+            Pole = app.Pole;
+
+            %plotting a single graph
+            n_sync = 120*Frequency/Pole;
+            s= [0: 0.01: 1];
+            n_m = (1-s)*n_sync;
+            w_sync = 2*pi*n_sync/60;
+            Tau = zeros(1, length(n_m));
+            for i = 1: length(n_m)
+                Tau(i) = (3*V_TH^2*R_2)/(w_sync*s(i)*((R_TH +(R_2/s(i)))^2 + (X_TH +X_2)^2));
+                if n_m(i) == n_sync
+                    Tau(i) =0;
+                end
+            end
+
+            plot(app.UIAxes, n_m, Tau);
+            hold(app.UIAxes, 'on');
+            s_max = R_2/ sqrt(app.R_TH^2 + (app.X_TH + X_2)^2);
+            n_mmax = (1- s_max)*n_sync;
+            Tau_max = (3*(V_TH)^2)/(2*w_sync*(R_TH +sqrt((R_TH)^2 + (X_TH + X_2)^2)));
+            plot(app.UIAxes,n_m, Tau_max*ones(1, length(n_m)), '--');
+            plot(app.UIAxes, n_mmax, Tau_max, 'o');
+            plot(app.UIAxes, n_mmax*ones(1, length(n_m)),Tau, '--');
+            hold(app.UIAxes, 'off');
+        end
+    end
+
+    methods (Access = private)
+
+        function plot_graph_VR(app, V_TH, R_TH, X_TH, R_2, X_2, legend_value);
+            app.Frequency = app.FrequencyKnob.Value;
+            Frequency = app.Frequency;
+            Pole = app.Pole;
+
+            %plotting a single graph
+            n_sync = 120*Frequency/Pole;
+            s= [0: 0.01: 1];
+            n_m = (1-s)*n_sync;
+            w_sync = 2*pi*n_sync/60;
+            Tau = zeros(1, length(n_m));
+            for i = 1: length(n_m)
+                Tau(i) = (3*V_TH^2*R_2)/(w_sync*s(i)*((R_TH +(R_2/s(i)))^2 + (X_TH +X_2)^2));
+                if n_m(i) == n_sync
+                    Tau(i) =0;
+                end
+            end
+
+            plot(app.UIAxes, n_m, Tau, "DisplayName",legend_value);
+        end
+
+        function plot_graph_Fre(app, V_TH, R_TH, X_TH, R_2, X_2, Frequency, legend_value)
+            Pole = app.Pole;
+
+            %plotting a single graph
+            n_sync = 120*Frequency/Pole;
+            s= [0: 0.01: 1];
+            n_m = (1-s)*n_sync;
+            w_sync = 2*pi*n_sync/60;
+            Tau = zeros(1, length(n_m));
+            for i = 1: length(n_m)
+                Tau(i) = (3*V_TH^2*R_2)/(w_sync*s(i)*((R_TH +(R_2/s(i)))^2 + (X_TH +X_2)^2));
+                if n_m(i) == n_sync
+                    Tau(i) =0;
+                end
+            end
+
+            plot(app.UIAxes, n_m, Tau, "DisplayName", legend_value);
+        end
+    end
+
+
+    % Callbacks that handle component events
+    methods (Access = private)
+
+        % Code that executes after component creation
+        function startupFcn(app)
+            app.UIFigure.Name = 'IM_Speed_Control';
+            app.tempapp = IM_Torque_Speed;
+
+            app.V_TH = app.tempapp.V_TH;
+            app.R_TH = app.tempapp.R_TH;
+            app.X_TH = app.tempapp.X_TH;
+            app.V_THEditField.Value = app.V_TH;
+            app.R_THEditField.Value = app.R_TH;
+            app.X_THEditField.Value =app.X_TH;
+
+            delete(app.tempapp);
+        end
+
+        % Value changing function: FrequencyKnob
+        function FrequencyKnobValueChanging(app, event)
+            app.Frequency = event.Value;
+            app.frequencyvalue.Value = event.Value;
+        end
+
+        % Button pushed function: PlotButton
+        function PlotButtonPushed(app, event)
+            cla(app.UIAxes);
+            if app.param_list.Value == ""
+                app.state = 0;
+            else
+                app.state = 1;
+            end
+
+
+            if app.state ==1
+                value = app.DropDown.Value;
+                switch value
+                    case 'Line Voltage'
+                        app.V_THEditField.Visible = 'off';
+                        str = app.param_list.Value;
+                        str(~isstrprop(str,'digit')) = ' '; %replace non-numeric characters with empty space
+                        V_TH = str2double(strsplit(strtrim(str)));
+                        R_2 = app.R_2EditField.Value;
+                        X_2 = app.X_2EditField.Value;
+                        n = length(V_TH);
+                        if n >= 5
+                            for i = 1:5
+                                if length(V_TH) ~=0
+                                    plot_graph_VR(app, V_TH(i), app.R_TH, app.X_TH, R_2, X_2, num2str(V_TH(i)));
+                                    hold(app.UIAxes,'on');
+                                end
+                            end
+                        elseif n == 0
+                        else
+                            for i = 1:n
+                                if length(V_TH) ~=0
+                                    plot_graph_VR(app, V_TH(i), app.R_TH, app.X_TH, R_2, X_2, num2str(V_TH(i)));
+                                    hold(app.UIAxes,'on');
+
+                                end
+                            end
+                        end
+                        legend(app.UIAxes);
+                        hold(app.UIAxes, "off");
+
+                    case 'Frequency'
+                        app.FrequencyKnob.Visible = 'off';
+                        str = app.param_list.Value;
+                        str(~isstrprop(str,'digit')) = ' '; %replace non-numeric characters with empty space
+                        Frequency = str2double(strsplit(strtrim(str)));
+                        R_2 = app.R_2EditField.Value;
+                        X_2 = app.X_2EditField.Value;
+                        n = length(Frequency);
+                        if n >= 5
+                            for i = 1:5
+                                plot_graph_Fre(app, app.V_TH, app.R_TH, app.X_TH, R_2, X_2, Frequency(i), num2str(Frequency(i)));
+                                hold(app.UIAxes,'on');
+                            end
+                        elseif n == 0
+
+                        else
+                            for i = 1:n
+                                plot_graph_Fre(app, app.V_TH, app.R_TH, app.X_TH, R_2, X_2, Frequency(i), num2str(Frequency(i)));
+                                hold(app.UIAxes,'on');
+                            end
+                        end
+                        legend(app.UIAxes);
+                        hold(app.UIAxes, "off");
+                    case 'Load Resistance'
+                        app.R_2EditField.Visible = 'off';
+                        str = app.param_list.Value;
+                        R_2 = str2num(str);
+                        X_2 = app.X_2EditField.Value;
+                        n = length(R_2);
+                        if n >= 5
+                            for i = 1:5
+                                plot_graph_VR(app, app.V_TH, app.R_TH, app.X_TH, R_2(i), X_2, num2str(R_2(i)));
+                                hold(app.UIAxes,'on');
+                            end
+                        elseif n == 0
+
+                        else
+                            for i = 1:n
+                                plot_graph_VR(app, app.V_TH, app.R_TH, app.X_TH, R_2(i), X_2,num2str(R_2(i)));
+                                hold(app.UIAxes,'on');
+                            end
+                        end
+                        legend(app.UIAxes);
+                        hold(app.UIAxes, "off");
+                end
+
+
+
+
+            elseif app.state == 0
+                plot_single_graph(app);
+
+            end
+        end
+
+        % Callback function: FrequencyKnob, R_2timesR_0Slider
+        function R_2timesR_0SliderValueChanging(app, event)
+            R_2 = app.R_2EditField.Value*app.R_2timesR_0Slider.Value;
+            cla(app.UIAxes);
+            V_TH = app.V_THEditField.Value;
+            R_TH = app.R_THEditField.Value;
+            X_TH = app.X_THEditField.Value;
+            X_2 = app.X_2EditField.Value;
+            app.Frequency = app.FrequencyKnob.Value;
+            Frequency = app.Frequency;
+            Pole = app.Pole;
+
+            %plotting a single graph
+            n_sync = 120*Frequency/Pole;
+            s= [0: 0.01: 1];
+            n_m = (1-s)*n_sync;
+            w_sync = 2*pi*n_sync/60;
+            Tau = zeros(1, length(n_m));
+            for i = 1: length(n_m)
+                Tau(i) = (3*V_TH^2*R_2)/(w_sync*s(i)*((R_TH +(R_2/s(i)))^2 + (X_TH +X_2)^2));
+                if n_m(i) == n_sync
+                    Tau(i) =0;
+                end
+            end
+
+            plot(app.UIAxes, n_m, Tau);
+            hold(app.UIAxes, 'on');
+            s_max = R_2/ sqrt(app.R_TH^2 + (app.X_TH + X_2)^2);
+            n_mmax = (1- s_max)*n_sync;
+            Tau_max = (3*(V_TH)^2)/(2*w_sync*(R_TH +sqrt((R_TH)^2 + (X_TH + X_2)^2)));
+            plot(app.UIAxes,n_m, Tau_max*ones(1, length(n_m)), '--');
+            plot(app.UIAxes, n_mmax, Tau_max, 'o');
+            plot(app.UIAxes, n_mmax*ones(1, length(n_m)),Tau, '--');
+            hold(app.UIAxes, 'off');
+            
+        end
+
+        % Value changed function: frequencyvalue
+        function frequencyvalueValueChanged(app, event)
+            app.FrequencyKnob.Value = app.frequencyvalue.Value;
+        end
+
+        % Value changed function: PoleSpinner
+        function PoleSpinnerValueChanged(app, event)
+            app.Pole = app.PoleSpinner.Value;
+        end
+
+        % Button pushed function: ResetButton
+        function ResetButtonPushed(app, event)
+            app.R_2EditField.Visible = 'on';
+            app.FrequencyKnob.Visible = 'on';
+            app.V_THEditField.Visible = 'on';
+            app.param_list.Value = '';
+            app.R_2EditField.Value = 0.332;
+            app.X_2EditField.Value = 0.464;
+            app.frequencyvalue.Value = 60;
+            app.FrequencyKnob.Value = app.frequencyvalue.Value;
+
+            cla(app.UIAxes);
+            legend(app.UIAxes, 'off');
+            startupFcn(app);
+
+        end
+    end
+
+    % Component initialization
+    methods (Access = private)
+
+        % Create UIFigure and components
+        function createComponents(app)
+
+            % Create UIFigure and hide until all components are created
+            app.UIFigure = uifigure('Visible', 'off');
+            app.UIFigure.Position = [100 100 1116 634];
+            app.UIFigure.Name = 'MATLAB App';
+
+            % Create UIAxes
+            app.UIAxes = uiaxes(app.UIFigure);
+            xlabel(app.UIAxes, 'n_m')
+            ylabel(app.UIAxes, 'Torque Induced')
+            zlabel(app.UIAxes, 'Z')
+            app.UIAxes.Position = [102 1 782 485];
+
+            % Create DropDown
+            app.DropDown = uidropdown(app.UIFigure);
+            app.DropDown.Items = {'Line Voltage', 'Frequency', 'Load Resistance'};
+            app.DropDown.FontName = 'Cambria';
+            app.DropDown.FontSize = 15;
+            app.DropDown.FontWeight = 'bold';
+            app.DropDown.Position = [681 529 137 35];
+            app.DropDown.Value = 'Line Voltage';
+
+            % Create ControllingParameterLabel
+            app.ControllingParameterLabel = uilabel(app.UIFigure);
+            app.ControllingParameterLabel.FontName = 'Cambria';
+            app.ControllingParameterLabel.FontWeight = 'bold';
+            app.ControllingParameterLabel.Position = [685 563 129 22];
+            app.ControllingParameterLabel.Text = 'Controlling Parameter';
+
+            % Create param_list
+            app.param_list = uieditfield(app.UIFigure, 'text');
+            app.param_list.FontName = 'Cambria';
+            app.param_list.FontSize = 15;
+            app.param_list.FontWeight = 'bold';
+            app.param_list.Position = [837 529 270 35];
+
+            % Create R_2EditFieldLabel
+            app.R_2EditFieldLabel = uilabel(app.UIFigure);
+            app.R_2EditFieldLabel.HorizontalAlignment = 'right';
+            app.R_2EditFieldLabel.FontName = 'Cambria';
+            app.R_2EditFieldLabel.FontSize = 15;
+            app.R_2EditFieldLabel.FontWeight = 'bold';
+            app.R_2EditFieldLabel.Position = [474 563 30 22];
+            app.R_2EditFieldLabel.Text = 'R_2';
+
+            % Create R_2EditField
+            app.R_2EditField = uieditfield(app.UIFigure, 'numeric');
+            app.R_2EditField.Limits = [1e-07 Inf];
+            app.R_2EditField.ValueDisplayFormat = '%.3f';
+            app.R_2EditField.FontName = 'Cambria';
+            app.R_2EditField.FontSize = 15;
+            app.R_2EditField.FontWeight = 'bold';
+            app.R_2EditField.Position = [519 563 100 22];
+            app.R_2EditField.Value = 0.332;
+
+            % Create X_2EditFieldLabel
+            app.X_2EditFieldLabel = uilabel(app.UIFigure);
+            app.X_2EditFieldLabel.HorizontalAlignment = 'right';
+            app.X_2EditFieldLabel.FontName = 'Cambria';
+            app.X_2EditFieldLabel.FontSize = 15;
+            app.X_2EditFieldLabel.FontWeight = 'bold';
+            app.X_2EditFieldLabel.Position = [475 518 29 22];
+            app.X_2EditFieldLabel.Text = 'X_2';
+
+            % Create X_2EditField
+            app.X_2EditField = uieditfield(app.UIFigure, 'numeric');
+            app.X_2EditField.Limits = [1e-07 Inf];
+            app.X_2EditField.ValueDisplayFormat = '%.3f';
+            app.X_2EditField.FontName = 'Cambria';
+            app.X_2EditField.FontSize = 15;
+            app.X_2EditField.FontWeight = 'bold';
+            app.X_2EditField.Position = [519 518 100 22];
+            app.X_2EditField.Value = 0.464;
+
+            % Create R_THEditFieldLabel
+            app.R_THEditFieldLabel = uilabel(app.UIFigure);
+            app.R_THEditFieldLabel.HorizontalAlignment = 'right';
+            app.R_THEditFieldLabel.FontName = 'Cambria';
+            app.R_THEditFieldLabel.FontSize = 15;
+            app.R_THEditFieldLabel.FontWeight = 'bold';
+            app.R_THEditFieldLabel.Position = [246 563 42 22];
+            app.R_THEditFieldLabel.Text = 'R_TH';
+
+            % Create R_THEditField
+            app.R_THEditField = uieditfield(app.UIFigure, 'numeric');
+            app.R_THEditField.ValueDisplayFormat = '%.3f';
+            app.R_THEditField.FontName = 'Cambria';
+            app.R_THEditField.FontSize = 15;
+            app.R_THEditField.FontWeight = 'bold';
+            app.R_THEditField.Position = [303 563 100 22];
+
+            % Create X_THEditFieldLabel
+            app.X_THEditFieldLabel = uilabel(app.UIFigure);
+            app.X_THEditFieldLabel.HorizontalAlignment = 'right';
+            app.X_THEditFieldLabel.FontName = 'Cambria';
+            app.X_THEditFieldLabel.FontSize = 15;
+            app.X_THEditFieldLabel.FontWeight = 'bold';
+            app.X_THEditFieldLabel.Position = [247 518 41 22];
+            app.X_THEditFieldLabel.Text = 'X_TH';
+
+            % Create X_THEditField
+            app.X_THEditField = uieditfield(app.UIFigure, 'numeric');
+            app.X_THEditField.ValueDisplayFormat = '%.3f';
+            app.X_THEditField.FontName = 'Cambria';
+            app.X_THEditField.FontSize = 15;
+            app.X_THEditField.FontWeight = 'bold';
+            app.X_THEditField.Position = [303 518 100 22];
+
+            % Create V_THEditFieldLabel
+            app.V_THEditFieldLabel = uilabel(app.UIFigure);
+            app.V_THEditFieldLabel.HorizontalAlignment = 'right';
+            app.V_THEditFieldLabel.FontName = 'Cambria';
+            app.V_THEditFieldLabel.FontSize = 15;
+            app.V_THEditFieldLabel.FontWeight = 'bold';
+            app.V_THEditFieldLabel.Position = [36 542 42 22];
+            app.V_THEditFieldLabel.Text = 'V_TH';
+
+            % Create V_THEditField
+            app.V_THEditField = uieditfield(app.UIFigure, 'numeric');
+            app.V_THEditField.ValueDisplayFormat = '%.3f';
+            app.V_THEditField.FontName = 'Cambria';
+            app.V_THEditField.FontSize = 15;
+            app.V_THEditField.FontWeight = 'bold';
+            app.V_THEditField.Position = [93 542 100 22];
+
+            % Create InductionMotorSpeedControlTechniquesLabel
+            app.InductionMotorSpeedControlTechniquesLabel = uilabel(app.UIFigure);
+            app.InductionMotorSpeedControlTechniquesLabel.FontName = 'Cambria';
+            app.InductionMotorSpeedControlTechniquesLabel.FontSize = 25;
+            app.InductionMotorSpeedControlTechniquesLabel.FontWeight = 'bold';
+            app.InductionMotorSpeedControlTechniquesLabel.FontColor = [0 0 1];
+            app.InductionMotorSpeedControlTechniquesLabel.Position = [313 610 505 33];
+            app.InductionMotorSpeedControlTechniquesLabel.Text = 'Induction Motor Speed Control Techniques';
+
+            % Create R_2timesR_0Label
+            app.R_2timesR_0Label = uilabel(app.UIFigure);
+            app.R_2timesR_0Label.Interpreter = 'latex';
+            app.R_2timesR_0Label.HorizontalAlignment = 'right';
+            app.R_2timesR_0Label.Position = [-3 117 71 36];
+            app.R_2timesR_0Label.Text = {'R_2'; '( $\times R_0$)'};
+
+            % Create R_2timesR_0Slider
+            app.R_2timesR_0Slider = uislider(app.UIFigure);
+            app.R_2timesR_0Slider.Limits = [1 5];
+            app.R_2timesR_0Slider.Orientation = 'vertical';
+            app.R_2timesR_0Slider.ValueChangingFcn = createCallbackFcn(app, @R_2timesR_0SliderValueChanging, true);
+            app.R_2timesR_0Slider.Position = [36 167 3 212];
+            app.R_2timesR_0Slider.Value = 1;
+
+            % Create PoleSpinnerLabel
+            app.PoleSpinnerLabel = uilabel(app.UIFigure);
+            app.PoleSpinnerLabel.HorizontalAlignment = 'right';
+            app.PoleSpinnerLabel.FontName = 'Cambria';
+            app.PoleSpinnerLabel.FontSize = 20;
+            app.PoleSpinnerLabel.FontWeight = 'bold';
+            app.PoleSpinnerLabel.Position = [981 55 45 26];
+            app.PoleSpinnerLabel.Text = 'Pole';
+
+            % Create PoleSpinner
+            app.PoleSpinner = uispinner(app.UIFigure);
+            app.PoleSpinner.Limits = [2 12];
+            app.PoleSpinner.ValueChangedFcn = createCallbackFcn(app, @PoleSpinnerValueChanged, true);
+            app.PoleSpinner.FontName = 'Cambria';
+            app.PoleSpinner.FontSize = 20;
+            app.PoleSpinner.FontWeight = 'bold';
+            app.PoleSpinner.Position = [952 93 110 60];
+            app.PoleSpinner.Value = 4;
+
+            % Create FrequencyKnobLabel
+            app.FrequencyKnobLabel = uilabel(app.UIFigure);
+            app.FrequencyKnobLabel.HorizontalAlignment = 'center';
+            app.FrequencyKnobLabel.FontName = 'Cambria';
+            app.FrequencyKnobLabel.FontSize = 20;
+            app.FrequencyKnobLabel.FontWeight = 'bold';
+            app.FrequencyKnobLabel.Position = [956 198 102 26];
+            app.FrequencyKnobLabel.Text = 'Frequency';
+
+            % Create FrequencyKnob
+            app.FrequencyKnob = uiknob(app.UIFigure, 'continuous');
+            app.FrequencyKnob.Limits = [50 200];
+            app.FrequencyKnob.ValueChangedFcn = createCallbackFcn(app, @R_2timesR_0SliderValueChanging, true);
+            app.FrequencyKnob.ValueChangingFcn = createCallbackFcn(app, @FrequencyKnobValueChanging, true);
+            app.FrequencyKnob.Position = [971 283 60 60];
+            app.FrequencyKnob.Value = 60;
+
+            % Create frequencyvalue
+            app.frequencyvalue = uieditfield(app.UIFigure, 'numeric');
+            app.frequencyvalue.ValueDisplayFormat = '%.3f';
+            app.frequencyvalue.ValueChangedFcn = createCallbackFcn(app, @frequencyvalueValueChanged, true);
+            app.frequencyvalue.FontName = 'Cambria';
+            app.frequencyvalue.FontSize = 15;
+            app.frequencyvalue.FontWeight = 'bold';
+            app.frequencyvalue.Position = [969 231 74 24];
+            app.frequencyvalue.Value = 60;
+
+            % Create Max5numbersseparatedbyLabel
+            app.Max5numbersseparatedbyLabel = uilabel(app.UIFigure);
+            app.Max5numbersseparatedbyLabel.FontName = 'Cambria';
+            app.Max5numbersseparatedbyLabel.FontSize = 15;
+            app.Max5numbersseparatedbyLabel.FontWeight = 'bold';
+            app.Max5numbersseparatedbyLabel.FontColor = [1 0 0];
+            app.Max5numbersseparatedbyLabel.Position = [841 507 266 22];
+            app.Max5numbersseparatedbyLabel.Text = '*Max 5 numbers separated by '' , ''';
+
+            % Create PlotButton
+            app.PlotButton = uibutton(app.UIFigure, 'push');
+            app.PlotButton.ButtonPushedFcn = createCallbackFcn(app, @PlotButtonPushed, true);
+            app.PlotButton.BackgroundColor = [0 0 1];
+            app.PlotButton.FontName = 'Cambria';
+            app.PlotButton.FontSize = 20;
+            app.PlotButton.FontWeight = 'bold';
+            app.PlotButton.FontColor = [1 1 1];
+            app.PlotButton.Position = [964 404 73 43];
+            app.PlotButton.Text = 'Plot';
+
+            % Create ResetButton
+            app.ResetButton = uibutton(app.UIFigure, 'push');
+            app.ResetButton.ButtonPushedFcn = createCallbackFcn(app, @ResetButtonPushed, true);
+            app.ResetButton.BackgroundColor = [0 0 1];
+            app.ResetButton.FontName = 'Cambria';
+            app.ResetButton.FontSize = 20;
+            app.ResetButton.FontWeight = 'bold';
+            app.ResetButton.FontColor = [1 1 1];
+            app.ResetButton.Position = [956 11 100 33];
+            app.ResetButton.Text = 'Reset';
+
+            % Show the figure after all components are created
+            app.UIFigure.Visible = 'on';
+        end
+    end
+
+    % App creation and deletion
+    methods (Access = public)
+
+        % Construct app
+        function app = IM_Speed_Control
+
+            % Create UIFigure and components
+            createComponents(app)
+
+            % Register the app with App Designer
+            registerApp(app, app.UIFigure)
+
+            % Execute the startup function
+            runStartupFcn(app, @startupFcn)
+
+            if nargout == 0
+                clear app
+            end
+        end
+
+        % Code that executes before app deletion
+        function delete(app)
+
+            % Delete UIFigure when app is deleted
+            delete(app.UIFigure)
+        end
+    end
+end
