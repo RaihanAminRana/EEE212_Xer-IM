@@ -1,0 +1,475 @@
+classdef Xer_3Phase_Y_D < matlab.apps.AppBase
+
+    % Properties that correspond to app components
+    properties (Access = public)
+        UIFigure                        matlab.ui.Figure
+        EditField2_2                    matlab.ui.control.NumericEditField
+        EditField_2                     matlab.ui.control.NumericEditField
+        jLabel_4                        matlab.ui.control.Label
+        jLabel_3                        matlab.ui.control.Label
+        DropDown                        matlab.ui.control.DropDown
+        jLabel_2                        matlab.ui.control.Label
+        EditField2                      matlab.ui.control.NumericEditField
+        EditField                       matlab.ui.control.NumericEditField
+        jLabel                          matlab.ui.control.Label
+        BaseValueofZ_VlowSideEditField  matlab.ui.control.NumericEditField
+        BaseValueofZ_VlowSideEditFieldLabel  matlab.ui.control.Label
+        BaseValueofZ_VhighSideEditField  matlab.ui.control.NumericEditField
+        BaseValueofZ_VhighSideEditFieldLabel  matlab.ui.control.Label
+        VoltageRegulationEditField      matlab.ui.control.NumericEditField
+        VoltageRegulationEditFieldLabel  matlab.ui.control.Label
+        SecondaryCktPhaseCurrentAEditField  matlab.ui.control.NumericEditField
+        SecondaryCktPhaseCurrentAEditFieldLabel  matlab.ui.control.Label
+        PrimaryCktPhaseCurrentAEditField  matlab.ui.control.NumericEditField
+        PrimaryCktPhaseCurrentAEditFieldLabel  matlab.ui.control.Label
+        ZPu_VlowSideEditField           matlab.ui.control.NumericEditField
+        ZPu_VlowSideEditFieldLabel      matlab.ui.control.Label
+        ZPu_VhighSideEditField          matlab.ui.control.NumericEditField
+        ZPu_VhighSideEditFieldLabel     matlab.ui.control.Label
+        BaseValueofIphase_VlowSideEditField  matlab.ui.control.NumericEditField
+        BaseValueofIphase_VlowSideEditFieldLabel  matlab.ui.control.Label
+        BaseValueofIphase_VhighSideEditField  matlab.ui.control.NumericEditField
+        BaseValueofIphase_VhighSideEditFieldLabel  matlab.ui.control.Label
+        TurnsRatioEditField             matlab.ui.control.NumericEditField
+        TurnsRatioEditFieldLabel        matlab.ui.control.Label
+        ReactivePowerPerPhaseVAREditField  matlab.ui.control.NumericEditField
+        ReactivePowerPerPhaseVAREditFieldLabel  matlab.ui.control.Label
+        RealPowerPerPhaseWEditField     matlab.ui.control.NumericEditField
+        RealPowerPerPhaseWEditFieldLabel  matlab.ui.control.Label
+        CircuitAnalysisButton           matlab.ui.control.Button
+        PowerFactorEditField            matlab.ui.control.NumericEditField
+        PowerFactorEditFieldLabel       matlab.ui.control.Label
+        EquivalentReactanceOhmEditField  matlab.ui.control.NumericEditField
+        EquivalentReactanceOhmEditFieldLabel  matlab.ui.control.Label
+        EquivalentResistanceOhmEditField  matlab.ui.control.NumericEditField
+        EquivalentResistanceOhmEditFieldLabel  matlab.ui.control.Label
+        SecondaryLineVoltageVEditField  matlab.ui.control.NumericEditField
+        SecondaryLineVoltageVEditFieldLabel  matlab.ui.control.Label
+        PrimaryLineVoltageVEditField    matlab.ui.control.NumericEditField
+        PrimaryLineVoltageVEditFieldLabel  matlab.ui.control.Label
+        ApparentPowerVAEditField        matlab.ui.control.NumericEditField
+        ApparentPowerVAEditFieldLabel   matlab.ui.control.Label
+        PhaseWyeDeltaTransformersLabel  matlab.ui.control.Label
+    end
+
+    % Callbacks that handle component events
+    methods (Access = private)
+
+        % Code that executes after component creation
+        function startupFcn(app)
+            app.UIFigure.Name = 'Xer 3 Phase Y - Δ';
+        end
+
+        % Button pushed function: CircuitAnalysisButton
+        function CircuitAnalysisButtonPushed(app, event)
+%Wye_delta 
+%Taking Inputs
+S=app.ApparentPowerVAEditField.Value;
+Vlp=app.PrimaryLineVoltageVEditField.Value;
+Vls=app.SecondaryLineVoltageVEditField.Value;
+PF=app.PowerFactorEditField.Value;
+PFchar=app.DropDown.Value;
+R=app.EquivalentResistanceOhmEditField.Value;
+X=app.EquivalentReactanceOhmEditField.Value;
+%Real power per phase
+P=S*abs(PF);
+P_PerPhase=P/3
+app.RealPowerPerPhaseWEditField.Value=P_PerPhase;
+%Reactive power per phase
+Q=sqrt(S^2-P^2);
+Q_PerPhase=Q/3
+app.ReactivePowerPerPhaseVAREditField.Value=Q_PerPhase;
+%Turns ratio
+Vphase_primary=Vlp/sqrt(3);
+Vphase_secondary=Vls;
+a=Vphase_primary/Vphase_secondary;
+app.TurnsRatioEditField.Value=a;
+%Base value in high voltage side
+Iphase_high_vol=S/(3*Vphase_primary);
+app.BaseValueofIphase_VhighSideEditField.Value=Iphase_high_vol;
+Zphase_high_vol=3*(Vphase_primary^2)/S;
+app.BaseValueofZ_VhighSideEditField.Value=Zphase_high_vol;
+%Base value in low voltage side
+Iphase_low_vol=S/(3*Vphase_secondary);
+app.BaseValueofIphase_VlowSideEditField.Value=Iphase_low_vol;
+Zphase_low_vol=3*(Vphase_secondary^2)/S;
+app.BaseValueofZ_VlowSideEditField.Value=Zphase_low_vol;
+%Impedence in pu in high voltage side
+Zh_real=R/Zphase_high_vol;
+Zh_imaginary=X/Zphase_high_vol;
+app.ZPu_VhighSideEditField.Value=Zh_real;
+app.EditField_2.Value=Zh_imaginary;
+%Impedence in pu in low voltage side
+Zl_real=R/Zphase_low_vol;
+Zl_imaginary=X/Zphase_low_vol;
+app.ZPu_VlowSideEditField.Value=Zl_real;
+app.EditField2_2.Value=Zl_imaginary;
+%Primary Phase current
+if PFchar=="Leading"
+   theta=acosd(PF);
+elseif PFchar=="Lagging"
+   theta=-acosd(PF);
+else 
+  theta=acosd(1);
+end
+Ip=S/(3*Vphase_primary);
+Ipx=Ip*cosd(theta);
+Ipy=Ip*sind(theta);
+Ipcomplex=Ipx+Ipy*j;
+app.PrimaryCktPhaseCurrentAEditField.Value=Ipx;
+app.EditField.Value=Ipy;
+%Secondary Phase current
+Is=S/(3*Vphase_secondary);
+Isx=Is*cosd(theta);
+Isy=Is*sind(theta);
+Iscomplex=Isx+Isy*j;
+app.SecondaryCktPhaseCurrentAEditField.Value=Isx;
+app.EditField2.Value=Isy;
+%Voltage Regulation
+V_phi_P=a*Vphase_secondary+(R+X*j)*Ipcomplex;
+VR_num=abs(V_phi_P)-a*Vphase_secondary;
+VR_denom=a*Vphase_secondary;
+VR=(VR_num/VR_denom)*100;
+app.VoltageRegulationEditField.Value=VR;
+        end
+    end
+
+    % Component initialization
+    methods (Access = private)
+
+        % Create UIFigure and components
+        function createComponents(app)
+
+            % Create UIFigure and hide until all components are created
+            app.UIFigure = uifigure('Visible', 'off');
+            app.UIFigure.Position = [100 100 707 586];
+            app.UIFigure.Name = 'MATLAB App';
+
+            % Create PhaseWyeDeltaTransformersLabel
+            app.PhaseWyeDeltaTransformersLabel = uilabel(app.UIFigure);
+            app.PhaseWyeDeltaTransformersLabel.HorizontalAlignment = 'center';
+            app.PhaseWyeDeltaTransformersLabel.FontName = 'Cambria';
+            app.PhaseWyeDeltaTransformersLabel.FontSize = 30;
+            app.PhaseWyeDeltaTransformersLabel.FontWeight = 'bold';
+            app.PhaseWyeDeltaTransformersLabel.FontColor = [0 0 1];
+            app.PhaseWyeDeltaTransformersLabel.Position = [119 531 462 40];
+            app.PhaseWyeDeltaTransformersLabel.Text = '3 Phase Wye Delta Transformers';
+
+            % Create ApparentPowerVAEditFieldLabel
+            app.ApparentPowerVAEditFieldLabel = uilabel(app.UIFigure);
+            app.ApparentPowerVAEditFieldLabel.HorizontalAlignment = 'right';
+            app.ApparentPowerVAEditFieldLabel.FontName = 'Cambria';
+            app.ApparentPowerVAEditFieldLabel.FontWeight = 'bold';
+            app.ApparentPowerVAEditFieldLabel.Position = [68 490 119 22];
+            app.ApparentPowerVAEditFieldLabel.Text = 'Apparent Power(VA)';
+
+            % Create ApparentPowerVAEditField
+            app.ApparentPowerVAEditField = uieditfield(app.UIFigure, 'numeric');
+            app.ApparentPowerVAEditField.Position = [202 490 100 22];
+            app.ApparentPowerVAEditField.Value = 25000;
+
+            % Create PrimaryLineVoltageVEditFieldLabel
+            app.PrimaryLineVoltageVEditFieldLabel = uilabel(app.UIFigure);
+            app.PrimaryLineVoltageVEditFieldLabel.HorizontalAlignment = 'right';
+            app.PrimaryLineVoltageVEditFieldLabel.FontName = 'Cambria';
+            app.PrimaryLineVoltageVEditFieldLabel.FontWeight = 'bold';
+            app.PrimaryLineVoltageVEditFieldLabel.Position = [45 443 140 22];
+            app.PrimaryLineVoltageVEditFieldLabel.Text = 'Primary Line Voltage(V)';
+
+            % Create PrimaryLineVoltageVEditField
+            app.PrimaryLineVoltageVEditField = uieditfield(app.UIFigure, 'numeric');
+            app.PrimaryLineVoltageVEditField.Position = [200 443 100 22];
+            app.PrimaryLineVoltageVEditField.Value = 10000;
+
+            % Create SecondaryLineVoltageVEditFieldLabel
+            app.SecondaryLineVoltageVEditFieldLabel = uilabel(app.UIFigure);
+            app.SecondaryLineVoltageVEditFieldLabel.HorizontalAlignment = 'right';
+            app.SecondaryLineVoltageVEditFieldLabel.FontName = 'Cambria';
+            app.SecondaryLineVoltageVEditFieldLabel.FontWeight = 'bold';
+            app.SecondaryLineVoltageVEditFieldLabel.Position = [34 399 151 22];
+            app.SecondaryLineVoltageVEditFieldLabel.Text = 'Secondary Line Voltage(V)';
+
+            % Create SecondaryLineVoltageVEditField
+            app.SecondaryLineVoltageVEditField = uieditfield(app.UIFigure, 'numeric');
+            app.SecondaryLineVoltageVEditField.Position = [200 399 100 22];
+            app.SecondaryLineVoltageVEditField.Value = 577;
+
+            % Create EquivalentResistanceOhmEditFieldLabel
+            app.EquivalentResistanceOhmEditFieldLabel = uilabel(app.UIFigure);
+            app.EquivalentResistanceOhmEditFieldLabel.HorizontalAlignment = 'right';
+            app.EquivalentResistanceOhmEditFieldLabel.FontName = 'Cambria';
+            app.EquivalentResistanceOhmEditFieldLabel.FontWeight = 'bold';
+            app.EquivalentResistanceOhmEditFieldLabel.Position = [373 490 161 22];
+            app.EquivalentResistanceOhmEditFieldLabel.Text = 'Equivalent Resistance(Ohm)';
+
+            % Create EquivalentResistanceOhmEditField
+            app.EquivalentResistanceOhmEditField = uieditfield(app.UIFigure, 'numeric');
+            app.EquivalentResistanceOhmEditField.Position = [549 490 100 22];
+            app.EquivalentResistanceOhmEditField.Value = 125;
+
+            % Create EquivalentReactanceOhmEditFieldLabel
+            app.EquivalentReactanceOhmEditFieldLabel = uilabel(app.UIFigure);
+            app.EquivalentReactanceOhmEditFieldLabel.HorizontalAlignment = 'right';
+            app.EquivalentReactanceOhmEditFieldLabel.FontName = 'Cambria';
+            app.EquivalentReactanceOhmEditFieldLabel.FontWeight = 'bold';
+            app.EquivalentReactanceOhmEditFieldLabel.Position = [379 451 157 22];
+            app.EquivalentReactanceOhmEditFieldLabel.Text = 'Equivalent Reactance(Ohm)';
+
+            % Create EquivalentReactanceOhmEditField
+            app.EquivalentReactanceOhmEditField = uieditfield(app.UIFigure, 'numeric');
+            app.EquivalentReactanceOhmEditField.Position = [551 451 100 22];
+            app.EquivalentReactanceOhmEditField.Value = 500;
+
+            % Create PowerFactorEditFieldLabel
+            app.PowerFactorEditFieldLabel = uilabel(app.UIFigure);
+            app.PowerFactorEditFieldLabel.HorizontalAlignment = 'right';
+            app.PowerFactorEditFieldLabel.FontName = 'Cambria';
+            app.PowerFactorEditFieldLabel.FontWeight = 'bold';
+            app.PowerFactorEditFieldLabel.Position = [457 399 79 22];
+            app.PowerFactorEditFieldLabel.Text = 'Power Factor';
+
+            % Create PowerFactorEditField
+            app.PowerFactorEditField = uieditfield(app.UIFigure, 'numeric');
+            app.PowerFactorEditField.Position = [551 399 100 22];
+            app.PowerFactorEditField.Value = 0.9;
+
+            % Create CircuitAnalysisButton
+            app.CircuitAnalysisButton = uibutton(app.UIFigure, 'push');
+            app.CircuitAnalysisButton.ButtonPushedFcn = createCallbackFcn(app, @CircuitAnalysisButtonPushed, true);
+            app.CircuitAnalysisButton.BackgroundColor = [0 0 1];
+            app.CircuitAnalysisButton.FontName = 'Cambria';
+            app.CircuitAnalysisButton.FontSize = 20;
+            app.CircuitAnalysisButton.FontWeight = 'bold';
+            app.CircuitAnalysisButton.FontColor = [1 1 1];
+            app.CircuitAnalysisButton.Position = [271 327 158 35];
+            app.CircuitAnalysisButton.Text = 'Circuit Analysis';
+
+            % Create RealPowerPerPhaseWEditFieldLabel
+            app.RealPowerPerPhaseWEditFieldLabel = uilabel(app.UIFigure);
+            app.RealPowerPerPhaseWEditFieldLabel.HorizontalAlignment = 'right';
+            app.RealPowerPerPhaseWEditFieldLabel.FontName = 'Cambria';
+            app.RealPowerPerPhaseWEditFieldLabel.FontWeight = 'bold';
+            app.RealPowerPerPhaseWEditFieldLabel.Position = [45 278 146 22];
+            app.RealPowerPerPhaseWEditFieldLabel.Text = 'Real Power Per Phase(W)';
+
+            % Create RealPowerPerPhaseWEditField
+            app.RealPowerPerPhaseWEditField = uieditfield(app.UIFigure, 'numeric');
+            app.RealPowerPerPhaseWEditField.Position = [206 278 100 22];
+
+            % Create ReactivePowerPerPhaseVAREditFieldLabel
+            app.ReactivePowerPerPhaseVAREditFieldLabel = uilabel(app.UIFigure);
+            app.ReactivePowerPerPhaseVAREditFieldLabel.HorizontalAlignment = 'right';
+            app.ReactivePowerPerPhaseVAREditFieldLabel.FontName = 'Cambria';
+            app.ReactivePowerPerPhaseVAREditFieldLabel.FontWeight = 'bold';
+            app.ReactivePowerPerPhaseVAREditFieldLabel.Position = [-1 236 181 22];
+            app.ReactivePowerPerPhaseVAREditFieldLabel.Text = 'Reactive  Power Per Phase(VAR)';
+
+            % Create ReactivePowerPerPhaseVAREditField
+            app.ReactivePowerPerPhaseVAREditField = uieditfield(app.UIFigure, 'numeric');
+            app.ReactivePowerPerPhaseVAREditField.Position = [206 236 100 22];
+
+            % Create TurnsRatioEditFieldLabel
+            app.TurnsRatioEditFieldLabel = uilabel(app.UIFigure);
+            app.TurnsRatioEditFieldLabel.HorizontalAlignment = 'right';
+            app.TurnsRatioEditFieldLabel.FontName = 'Cambria';
+            app.TurnsRatioEditFieldLabel.FontWeight = 'bold';
+            app.TurnsRatioEditFieldLabel.Position = [120 193 71 22];
+            app.TurnsRatioEditFieldLabel.Text = 'Turns Ratio';
+
+            % Create TurnsRatioEditField
+            app.TurnsRatioEditField = uieditfield(app.UIFigure, 'numeric');
+            app.TurnsRatioEditField.Position = [206 193 100 22];
+
+            % Create BaseValueofIphase_VhighSideEditFieldLabel
+            app.BaseValueofIphase_VhighSideEditFieldLabel = uilabel(app.UIFigure);
+            app.BaseValueofIphase_VhighSideEditFieldLabel.HorizontalAlignment = 'right';
+            app.BaseValueofIphase_VhighSideEditFieldLabel.FontName = 'Cambria';
+            app.BaseValueofIphase_VhighSideEditFieldLabel.FontWeight = 'bold';
+            app.BaseValueofIphase_VhighSideEditFieldLabel.Position = [15 151 177 22];
+            app.BaseValueofIphase_VhighSideEditFieldLabel.Text = 'Base Value of Iphase_VhighSide';
+
+            % Create BaseValueofIphase_VhighSideEditField
+            app.BaseValueofIphase_VhighSideEditField = uieditfield(app.UIFigure, 'numeric');
+            app.BaseValueofIphase_VhighSideEditField.Position = [207 151 100 22];
+
+            % Create BaseValueofIphase_VlowSideEditFieldLabel
+            app.BaseValueofIphase_VlowSideEditFieldLabel = uilabel(app.UIFigure);
+            app.BaseValueofIphase_VlowSideEditFieldLabel.HorizontalAlignment = 'right';
+            app.BaseValueofIphase_VlowSideEditFieldLabel.FontName = 'Cambria';
+            app.BaseValueofIphase_VlowSideEditFieldLabel.FontWeight = 'bold';
+            app.BaseValueofIphase_VlowSideEditFieldLabel.Position = [18 113 173 22];
+            app.BaseValueofIphase_VlowSideEditFieldLabel.Text = 'Base Value of Iphase_VlowSide';
+
+            % Create BaseValueofIphase_VlowSideEditField
+            app.BaseValueofIphase_VlowSideEditField = uieditfield(app.UIFigure, 'numeric');
+            app.BaseValueofIphase_VlowSideEditField.Position = [206 113 100 22];
+
+            % Create ZPu_VhighSideEditFieldLabel
+            app.ZPu_VhighSideEditFieldLabel = uilabel(app.UIFigure);
+            app.ZPu_VhighSideEditFieldLabel.HorizontalAlignment = 'right';
+            app.ZPu_VhighSideEditFieldLabel.FontName = 'Cambria';
+            app.ZPu_VhighSideEditFieldLabel.FontWeight = 'bold';
+            app.ZPu_VhighSideEditFieldLabel.Position = [344 193 95 22];
+            app.ZPu_VhighSideEditFieldLabel.Text = 'Z(Pu)_VhighSide';
+
+            % Create ZPu_VhighSideEditField
+            app.ZPu_VhighSideEditField = uieditfield(app.UIFigure, 'numeric');
+            app.ZPu_VhighSideEditField.Position = [454 193 100 22];
+
+            % Create ZPu_VlowSideEditFieldLabel
+            app.ZPu_VlowSideEditFieldLabel = uilabel(app.UIFigure);
+            app.ZPu_VlowSideEditFieldLabel.HorizontalAlignment = 'right';
+            app.ZPu_VlowSideEditFieldLabel.FontName = 'Cambria';
+            app.ZPu_VlowSideEditFieldLabel.FontWeight = 'bold';
+            app.ZPu_VlowSideEditFieldLabel.Position = [347 151 92 22];
+            app.ZPu_VlowSideEditFieldLabel.Text = 'Z(Pu)_VlowSide';
+
+            % Create ZPu_VlowSideEditField
+            app.ZPu_VlowSideEditField = uieditfield(app.UIFigure, 'numeric');
+            app.ZPu_VlowSideEditField.Position = [454 151 100 22];
+
+            % Create PrimaryCktPhaseCurrentAEditFieldLabel
+            app.PrimaryCktPhaseCurrentAEditFieldLabel = uilabel(app.UIFigure);
+            app.PrimaryCktPhaseCurrentAEditFieldLabel.HorizontalAlignment = 'right';
+            app.PrimaryCktPhaseCurrentAEditFieldLabel.FontName = 'Cambria';
+            app.PrimaryCktPhaseCurrentAEditFieldLabel.FontWeight = 'bold';
+            app.PrimaryCktPhaseCurrentAEditFieldLabel.Position = [21 75 171 22];
+            app.PrimaryCktPhaseCurrentAEditFieldLabel.Text = 'Primary Ckt Phase Current(A)';
+
+            % Create PrimaryCktPhaseCurrentAEditField
+            app.PrimaryCktPhaseCurrentAEditField = uieditfield(app.UIFigure, 'numeric');
+            app.PrimaryCktPhaseCurrentAEditField.Position = [207 75 100 22];
+
+            % Create SecondaryCktPhaseCurrentAEditFieldLabel
+            app.SecondaryCktPhaseCurrentAEditFieldLabel = uilabel(app.UIFigure);
+            app.SecondaryCktPhaseCurrentAEditFieldLabel.HorizontalAlignment = 'right';
+            app.SecondaryCktPhaseCurrentAEditFieldLabel.FontName = 'Cambria';
+            app.SecondaryCktPhaseCurrentAEditFieldLabel.FontWeight = 'bold';
+            app.SecondaryCktPhaseCurrentAEditFieldLabel.Position = [10 40 182 22];
+            app.SecondaryCktPhaseCurrentAEditFieldLabel.Text = 'Secondary Ckt Phase Current(A)';
+
+            % Create SecondaryCktPhaseCurrentAEditField
+            app.SecondaryCktPhaseCurrentAEditField = uieditfield(app.UIFigure, 'numeric');
+            app.SecondaryCktPhaseCurrentAEditField.Position = [207 40 100 22];
+
+            % Create VoltageRegulationEditFieldLabel
+            app.VoltageRegulationEditFieldLabel = uilabel(app.UIFigure);
+            app.VoltageRegulationEditFieldLabel.HorizontalAlignment = 'right';
+            app.VoltageRegulationEditFieldLabel.FontName = 'Cambria';
+            app.VoltageRegulationEditFieldLabel.FontWeight = 'bold';
+            app.VoltageRegulationEditFieldLabel.Position = [365 113 129 22];
+            app.VoltageRegulationEditFieldLabel.Text = 'Voltage Regulation(%)';
+
+            % Create VoltageRegulationEditField
+            app.VoltageRegulationEditField = uieditfield(app.UIFigure, 'numeric');
+            app.VoltageRegulationEditField.Position = [509 113 100 22];
+
+            % Create BaseValueofZ_VhighSideEditFieldLabel
+            app.BaseValueofZ_VhighSideEditFieldLabel = uilabel(app.UIFigure);
+            app.BaseValueofZ_VhighSideEditFieldLabel.HorizontalAlignment = 'right';
+            app.BaseValueofZ_VhighSideEditFieldLabel.FontName = 'Cambria';
+            app.BaseValueofZ_VhighSideEditFieldLabel.FontWeight = 'bold';
+            app.BaseValueofZ_VhighSideEditFieldLabel.Position = [344 273 148 22];
+            app.BaseValueofZ_VhighSideEditFieldLabel.Text = 'Base Value of Z_VhighSide';
+
+            % Create BaseValueofZ_VhighSideEditField
+            app.BaseValueofZ_VhighSideEditField = uieditfield(app.UIFigure, 'numeric');
+            app.BaseValueofZ_VhighSideEditField.Position = [507 273 100 22];
+
+            % Create BaseValueofZ_VlowSideEditFieldLabel
+            app.BaseValueofZ_VlowSideEditFieldLabel = uilabel(app.UIFigure);
+            app.BaseValueofZ_VlowSideEditFieldLabel.HorizontalAlignment = 'right';
+            app.BaseValueofZ_VlowSideEditFieldLabel.FontName = 'Cambria';
+            app.BaseValueofZ_VlowSideEditFieldLabel.FontWeight = 'bold';
+            app.BaseValueofZ_VlowSideEditFieldLabel.Position = [349 236 144 22];
+            app.BaseValueofZ_VlowSideEditFieldLabel.Text = 'Base Value of Z_VlowSide';
+
+            % Create BaseValueofZ_VlowSideEditField
+            app.BaseValueofZ_VlowSideEditField = uieditfield(app.UIFigure, 'numeric');
+            app.BaseValueofZ_VlowSideEditField.Position = [508 236 100 22];
+
+            % Create jLabel
+            app.jLabel = uilabel(app.UIFigure);
+            app.jLabel.FontName = 'Cambria';
+            app.jLabel.FontWeight = 'bold';
+            app.jLabel.Position = [316 75 25 22];
+            app.jLabel.Text = '+ j';
+
+            % Create EditField
+            app.EditField = uieditfield(app.UIFigure, 'numeric');
+            app.EditField.Position = [336 75 100 22];
+
+            % Create EditField2
+            app.EditField2 = uieditfield(app.UIFigure, 'numeric');
+            app.EditField2.Position = [337 40 100 22];
+
+            % Create jLabel_2
+            app.jLabel_2 = uilabel(app.UIFigure);
+            app.jLabel_2.FontName = 'Cambria';
+            app.jLabel_2.FontWeight = 'bold';
+            app.jLabel_2.Position = [317 40 19 22];
+            app.jLabel_2.Text = '+ j';
+
+            % Create DropDown
+            app.DropDown = uidropdown(app.UIFigure);
+            app.DropDown.Items = {'Leading', 'Lagging', 'Unity', 'Option 4'};
+            app.DropDown.FontName = 'Cambria';
+            app.DropDown.FontWeight = 'bold';
+            app.DropDown.Position = [550 361 100 22];
+            app.DropDown.Value = 'Lagging';
+
+            % Create jLabel_3
+            app.jLabel_3 = uilabel(app.UIFigure);
+            app.jLabel_3.FontName = 'Cambria';
+            app.jLabel_3.FontWeight = 'bold';
+            app.jLabel_3.Position = [562 193 25 22];
+            app.jLabel_3.Text = '+ j';
+
+            % Create jLabel_4
+            app.jLabel_4 = uilabel(app.UIFigure);
+            app.jLabel_4.FontName = 'Cambria';
+            app.jLabel_4.FontWeight = 'bold';
+            app.jLabel_4.Position = [563 151 25 22];
+            app.jLabel_4.Text = '+ j';
+
+            % Create EditField_2
+            app.EditField_2 = uieditfield(app.UIFigure, 'numeric');
+            app.EditField_2.Position = [588 193 100 22];
+
+            % Create EditField2_2
+            app.EditField2_2 = uieditfield(app.UIFigure, 'numeric');
+            app.EditField2_2.Position = [589 151 100 22];
+
+            % Show the figure after all components are created
+            app.UIFigure.Visible = 'on';
+        end
+    end
+
+    % App creation and deletion
+    methods (Access = public)
+
+        % Construct app
+        function app = Xer_3Phase_Y_D
+
+            % Create UIFigure and components
+            createComponents(app)
+
+            % Register the app with App Designer
+            registerApp(app, app.UIFigure)
+
+            % Execute the startup function
+            runStartupFcn(app, @startupFcn)
+
+            if nargout == 0
+                clear app
+            end
+        end
+
+        % Code that executes before app deletion
+        function delete(app)
+
+            % Delete UIFigure when app is deleted
+            delete(app.UIFigure)
+        end
+    end
+end
